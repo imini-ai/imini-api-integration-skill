@@ -1,11 +1,11 @@
 # Async task workflow
 
-Every imini generation call follows the same pattern: submit a task, receive a `task_id`, then poll the task-query endpoint until the task is `completed` or `failed`. There is no synchronous generation endpoint.
+Every imini generation call follows the same pattern: submit a task, receive a `task_id`, then poll the task-query endpoint until the task is `succeeded` or `failed`. There is no synchronous generation endpoint.
 
 ## State machine
 
 ```
- [submit]  →  task_id + status=pending
+ [submit]  →  task_id + status=queued
                   │
                   ▼
          ┌────────────────────┐
@@ -14,19 +14,21 @@ Every imini generation call follows the same pattern: submit a task, receive a `
                   │
        ┌──────────┼──────────┐
        ▼          ▼          ▼
-    pending   running    completed / failed
+     queued   processing  succeeded / failed
        │          │
        └────┬─────┘
             ▼
        (re-poll after backoff)
 ```
 
-Statuses returned by the task-query endpoint:
+Statuses returned by the task-query endpoint (exactly these four values):
 
-- `pending` — submitted, not yet started
-- `running` — generating
-- `completed` — result is ready; the payload contains output URL(s)
+- `queued` — submitted, waiting in queue
+- `processing` — generating
+- `succeeded` — result is ready; the payload contains output URL(s)
 - `failed` — task failed; an `error` payload is included
+
+> Terminal states are **`succeeded`** and **`failed`**. Do not check for `pending` / `completed` / `running` — those values are never returned.
 
 ## Endpoints
 

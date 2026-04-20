@@ -54,7 +54,7 @@ def poll_image(task_id, start_interval=2.0, max_interval=30.0, timeout=60.0):
     while time.monotonic() < deadline:
         result = _request("GET", f"/v1/images/tasks/{task_id}")
         status = result.get("status")
-        if status == "completed":
+        if status == "succeeded":
             return result
         if status == "failed":
             raise RuntimeError(f"Task failed: {result.get('error')}")
@@ -101,7 +101,7 @@ async def poll(session, path, task_id, start=2.0, cap=30.0, timeout=60.0):
         async with session.get(f"{BASE_URL}{path}/{task_id}") as resp:
             resp.raise_for_status()
             result = await resp.json()
-        if result.get("status") == "completed":
+        if result.get("status") == "succeeded":
             return result
         if result.get("status") == "failed":
             raise RuntimeError(f"Task failed: {result.get('error')}")
@@ -167,7 +167,7 @@ async function pollVideo(taskId, { startMs = 5000, capMs = 30000, timeoutMs = 60
     let interval = startMs;
     while (Date.now() < deadline) {
         const result = await request("GET", `/v1/videos/tasks/${taskId}`);
-        if (result.status === "completed") return result;
+        if (result.status === "succeeded") return result;
         if (result.status === "failed") {
             throw new Error(`Task failed: ${JSON.stringify(result.error)}`);
         }
@@ -204,7 +204,7 @@ interface SubmitResponse {
 
 interface TaskResult<T = unknown> {
     task_id: string;
-    status: "pending" | "running" | "completed" | "failed";
+    status: "queued" | "processing" | "succeeded" | "failed";
     result?: T;
     error?: { code: string; message: string; status: number; request_id: string };
 }
@@ -238,7 +238,7 @@ async function pollTask<T extends TaskResult>(
     let interval = startMs;
     while (Date.now() < deadline) {
         const result = await request<T>("GET", `${basePath}/${taskId}`);
-        if (result.status === "completed") return result;
+        if (result.status === "succeeded") return result;
         if (result.status === "failed") {
             throw new Error(`Task failed: ${JSON.stringify(result.error)}`);
         }
@@ -280,7 +280,7 @@ for i in {1..30}; do
     status=$(echo "$result" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("status",""))')
     echo "Poll $i: status=$status"
     case "$status" in
-        completed) echo "$result"; exit 0 ;;
+        succeeded) echo "$result"; exit 0 ;;
         failed) echo "$result" >&2; exit 1 ;;
     esac
     sleep $interval

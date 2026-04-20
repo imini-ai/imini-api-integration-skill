@@ -13,7 +13,7 @@ imini offers AIGC image and video generation APIs under:
 
 - **Unified endpoint**: `https://openapi.imini.ai/imini/router`
 - **Unified auth**: one Bearer API key works for every model
-- **Unified async pattern**: every generation call returns a `task_id`; poll the task-query endpoint until `status` is `completed` or `failed`
+- **Unified async pattern**: every generation call returns a `task_id`; poll the task-query endpoint until `status` is `succeeded` or `failed`. The four possible values are `queued` / `processing` / `succeeded` / `failed` — do NOT check for `pending` / `completed` / `running`, those strings are never returned.
 - **Unified error shape**: `{ error: { code, message, status, request_id } }`
 
 ## When to use this skill
@@ -96,8 +96,8 @@ Use the YAML endpoint (not the `.md` endpoint) — it's clean OpenAPI 3.1.0 and 
 Use the templates in `references/integration_examples.md`. Every generated code bundle MUST include:
 
 1. **Submit function** — POST to the generation endpoint, return `task_id`
-2. **Polling loop** — GET the task-query endpoint with exponential backoff until `status` is `completed` or `failed`, with a hard timeout
-3. **Result extraction** — pull the output URL(s) from the completed payload
+2. **Polling loop** — GET the task-query endpoint with exponential backoff until `status === "succeeded"` or `status === "failed"`, with a hard timeout. Never branch on `completed` / `running` — those values do not exist in this API.
+3. **Result extraction** — image tasks return `images[].url`; video tasks return `videos[].url` (plus `width`, `height`, and for videos `duration`). Always read the array even if it has a single element.
 4. **Error handling** — see `references/errors.md`
 
 Supported output languages (initial):

@@ -59,7 +59,7 @@ delay = min(cap, base * 1.5^attempt) * (0.8 + 0.4 * random())
 
 ## Task-level timeout guidance
 
-Keep one **hard timeout** per task, measured from submit to `completed`. Polling retries share the budget.
+Keep one **hard timeout** per task, measured from submit to `succeeded`. Polling retries share the budget.
 
 | Model type | Suggested timeout |
 |---|---|
@@ -78,6 +78,6 @@ For every submit + poll round, log:
 - `model` (e.g. `google/nano-banana-pro`)
 - `task_id`
 - `request_id` of every HTTP call
-- Final `status` (`completed` / `failed` / timeout)
+- Final `status` (`succeeded` / `failed` / timeout)
 - Elapsed time from submit to completion
 - Estimated credit cost (derived at submit time from the pricing tables)
