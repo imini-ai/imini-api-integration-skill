@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  <em>🚀 The official skill for imini open platform — works with Claude Code, Codex, Cursor, and other agents that load Markdown-based skills</em>
+  <em>🚀 The official skill for imini open platform — works with 55+ agents (Claude Code, Codex, Cursor, OpenCode, OpenClaw, Hermes, …) via the open <a href="https://github.com/vercel-labs/skills">skills</a> ecosystem</em>
 </p>
 
 <p align="center">
@@ -12,6 +12,7 @@
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"><img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg" /></a>
+  <a href="https://github.com/vercel-labs/skills"><img alt="Agents" src="https://img.shields.io/badge/Agents-55%2B-blueviolet.svg" /></a>
   <a href="https://claude.com/claude-code"><img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-supported-8A3FFC.svg" /></a>
   <a href="#"><img alt="Codex" src="https://img.shields.io/badge/Codex-supported-10A37F.svg" /></a>
   <a href="#"><img alt="Cursor" src="https://img.shields.io/badge/Cursor-supported-000000.svg" /></a>
@@ -63,15 +64,19 @@ Works in any agent that loads Markdown skills — Claude Code, Codex, Cursor, an
 
 ### Installation
 
-See [INSTALL.md](./INSTALL.md) for all four supported paths. The fastest:
+See [INSTALL.md](./INSTALL.md) for all four supported paths. The fastest is the cross-agent one-liner:
+
+```bash
+npx skills add imini-ai/imini-api-integration-skill
+```
+
+This works on Claude Code, Codex, Cursor, OpenCode, OpenClaw, Hermes, and 50+ other agents — `npx skills` auto-detects which one you have and installs the skill into its conventional skills directory.
+
+Or if you're a Claude Code user and prefer the native plugin flow:
 
 ```
-# Claude Code (inside the agent)
 /plugin marketplace add imini-ai/imini-api-integration-skill
 /plugin install imini@imini
-
-# Or cross-agent one-liner (Claude Code / Codex / Cursor)
-npx skills add imini-ai/imini-api-integration-skill
 ```
 
 ### Verify
@@ -160,23 +165,31 @@ The catalog script uses only the Python standard library — no `pip install` re
 ## 📚 Documentation Structure
 
 ```
-imini-api-integration-skill/
-├── SKILL.md                       # Main skill workflow (7 steps) — root path, for legacy standalone use
-├── scripts/
-│   └── fetch_imini_catalog.py     # Live catalog fetcher / parser, parses pricing too (stdlib-only)
-├── references/
-│   ├── workflow.md                # Async task state machine + polling strategy
-│   ├── model_selection.md         # Decision tree (capability map; price is fetched live)
-│   ├── integration_examples.md    # Python (sync+async) / Node.js / TypeScript / cURL templates
-│   └── errors.md                  # Authoritative timeout table + error codes + retry policy
-├── skills/api-integration/        # Plugin-style skill path — symlinks back to root for cross-agent installers
-├── .claude-plugin/                # Claude Code plugin + marketplace manifests
-├── .codex-plugin/plugin.json      # Codex manifest
-├── .cursor-plugin/plugin.json     # Cursor manifest
-├── setup                          # Universal symlink-based installer (auto-detects host)
-├── INSTALL.md                     # All four install paths and update / uninstall instructions
-└── VERSION
+imini-api-integration-skill/         # repo root = marketplace root
+├── .claude-plugin/
+│   └── marketplace.json             # Claude Code marketplace entry, source: "./plugins/imini"
+├── plugins/
+│   └── imini/                       # the imini plugin (plugin name = "imini")
+│       ├── .claude-plugin/
+│       │   └── plugin.json          # Claude Code plugin manifest
+│       └── skills/
+│           └── api-integration/     # the skill itself — also installed as ~/.<agent>/skills/api-integration/
+│               ├── SKILL.md         # Main workflow (7 steps)
+│               ├── references/
+│               │   ├── workflow.md            # Async task state machine + polling strategy
+│               │   ├── model_selection.md     # Decision tree (capability map; price fetched live)
+│               │   ├── integration_examples.md  # Python (sync+async) / Node.js / TypeScript / cURL templates
+│               │   └── errors.md              # Authoritative timeout table + error codes + retry policy
+│               └── scripts/
+│                   └── fetch_imini_catalog.py  # Live catalog fetcher / parser (stdlib-only)
+├── setup                            # Universal bash installer (auto-detects host)
+├── INSTALL.md                       # All four install paths and update / uninstall instructions
+├── README.md, README_CN.md
+├── VERSION
+└── LICENSE
 ```
+
+This layout matches the canonical Claude Code plugin marketplace structure (compare with Anthropic's `claude-plugins-official` repo). `npx skills` recursively discovers `SKILL.md` regardless of nesting, so the same layout serves both the Claude Code marketplace path and every other agent the CLI supports.
 
 ## 🔑 API Key
 
@@ -229,7 +242,7 @@ Get your imini API key (one key works for every model):
 ## ✅ Requirements
 
 - 🐍 Python 3.8+ — for the catalog script (stdlib only, no `pip install`)
-- 🤖 An agent that loads Markdown skills — [Claude Code](https://claude.com/claude-code), Codex, Cursor, or similar
+- 🤖 An agent that loads Markdown skills — [Claude Code](https://claude.com/claude-code), Codex, Cursor, OpenCode, OpenClaw, Hermes, or [any of 50+ others](https://github.com/vercel-labs/skills#supported-agents)
 - (Generated code only) Node.js 18+ if you choose the JavaScript/TypeScript templates (native `fetch`)
 
 ## 🔗 Links

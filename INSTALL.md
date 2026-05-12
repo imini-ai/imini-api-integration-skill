@@ -1,24 +1,43 @@
 # Install imini API Integration Skill
 
-This skill ships **one** capability — generating production-ready async code that integrates imini Open Platform image and video generation into any project. It works with Claude Code, Codex, Cursor, and any other agent that loads Markdown-based skills.
+This skill ships **one** capability — generating production-ready async code that integrates imini Open Platform image and video generation into any project. It works with Claude Code, Codex, Cursor, OpenCode, OpenClaw, Hermes, and 50+ other agents that load Markdown-based skills.
 
 ## Quick decision
 
 | You are... | Recommended install |
 |---|---|
-| Claude Code user, want it as a plugin | **#1 below** — `/plugin marketplace add` |
-| Cross-agent user, prefer one command | **#2 below** — `npx skills add` |
-| Codex / Cursor user, or no Node | **#3 below** — `./setup` |
-| Long-time standalone user, want to stay simple | **#4 below** — manual symlink |
+| Any agent (Claude Code, Codex, Cursor, OpenCode, …) | **#1 below** — `npx skills add` |
+| Claude Code user, prefer the native plugin flow | **#2 below** — `/plugin marketplace add` |
+| No Node, or want a single bash command | **#3 below** — `./setup` |
+| Want full manual control | **#4 below** — manual symlink |
 
 ## Prerequisites
 
 - Get an imini API key: https://imini.ai/api-keys — one key works for every model.
-- (Optional, only for some install paths) Node.js 18+ for `npx skills add`.
+- (Only for path #1) Node.js for `npx`.
 
 ---
 
-## 1. Claude Code marketplace
+## 1. `npx skills add` (recommended — works on 55+ agents)
+
+[`vercel-labs/skills`](https://github.com/vercel-labs/skills) auto-detects the active agent (Claude Code / Codex / Cursor / OpenCode / OpenClaw / Hermes / Junie / Augment / … 55 total) and installs the skill into its conventional skills directory:
+
+```bash
+npx skills add imini-ai/imini-api-integration-skill
+```
+
+It recursively scans this repo for `SKILL.md` and writes a symlink (or `--copy`) at `~/.<agent>/skills/api-integration/`. Update with the same command.
+
+Useful flags:
+
+```bash
+npx skills add imini-ai/imini-api-integration-skill --list                    # preview what would be installed
+npx skills add imini-ai/imini-api-integration-skill -a claude-code -a codex   # install to multiple specific agents
+npx skills add imini-ai/imini-api-integration-skill --copy                    # copy instead of symlink
+npx skills add imini-ai/imini-api-integration-skill -g                        # global (~/.<agent>/) vs project (.<agent>/)
+```
+
+## 2. Claude Code marketplace (native flow)
 
 Inside Claude Code:
 
@@ -28,23 +47,11 @@ Inside Claude Code:
 /reload-plugins
 ```
 
-Invokes as `/imini:api-integration`. Update later with `/plugin update imini@imini`.
+The repo's `.claude-plugin/marketplace.json` is read directly from GitHub — no Anthropic-side publishing required. The skill invokes as `/imini:api-integration`. Update later with `/plugin update imini@imini`.
 
-This reads `.claude-plugin/marketplace.json` from the repo — no Anthropic-side publishing required, the repo IS the marketplace.
+## 3. Setup script (universal bash fallback)
 
-## 2. `npx skills add` (cross-agent)
-
-[`vercel-labs/skills`](https://github.com/vercel-labs/skills) auto-detects whether you're on Claude Code, Codex, or Cursor and writes the skill to the right path:
-
-```bash
-npx skills add imini-ai/imini-api-integration-skill
-```
-
-Update with the same command.
-
-## 3. Setup script (universal fallback)
-
-If you can't or don't want to use `/plugin` or `npx`:
+When you can't or don't want to use Node:
 
 ```bash
 git clone --depth 1 https://github.com/imini-ai/imini-api-integration-skill.git
@@ -55,36 +62,34 @@ cd imini-api-integration-skill
 Flags:
 
 ```bash
-./setup --host claude        # force Claude Code install path
-./setup --host codex         # force Codex install path
-./setup --host cursor        # force Cursor install path
-./setup --name my-imini      # customize install dir name
-./setup --dry-run            # preview without modifying anything
-./setup --help               # full options
+./setup --host claude     # force install for Claude Code (~/.claude/skills/)
+./setup --host codex      # force install for Codex (~/.codex/skills/)
+./setup --host cursor     # force install for Cursor (~/.cursor/skills/)
+./setup --name <name>     # customize install directory name (default: imini-api-integration)
+./setup --dry-run         # preview without modifying anything
+./setup --help            # full options
 ```
 
-The script symlinks `skills/api-integration/` into your agent's standalone skills directory (`~/.<agent>/skills/imini-api-integration/`). Idempotent — re-run any time. Existing real directories are backed up to `*.bak.<timestamp>` before being replaced.
+It symlinks `plugins/imini/skills/api-integration` into the host's standalone skills directory. Idempotent — re-run any time. Existing real directories are backed up to `*.bak.<timestamp>` before being replaced.
 
 ### ⚠ Important: don't clone INTO the install target
 
-If you clone the repo directly into `~/.claude/skills/imini-api-integration/` (or the equivalent Codex / Cursor path), setup will refuse to run because the source and target would be the same directory. Clone to a separate location (e.g. `~/projects/imini-api-integration-skill/`) and run `./setup` from there.
+If you clone the repo directly into `~/.claude/skills/imini-api-integration/` (or the equivalent Codex / Cursor path), `setup` will refuse to run because the source and target would be the same directory. Clone to a separate location (for example `~/projects/imini-api-integration-skill/`) and run `./setup` from there.
 
-## 4. Manual symlink (legacy standalone path)
-
-For users who want the absolute minimum:
+## 4. Manual symlink
 
 ```bash
 git clone --depth 1 https://github.com/imini-ai/imini-api-integration-skill.git ~/projects/imini-api-integration-skill
-ln -s ~/projects/imini-api-integration-skill/skills/api-integration ~/.claude/skills/imini-api-integration
+ln -s ~/projects/imini-api-integration-skill/plugins/imini/skills/api-integration ~/.claude/skills/imini-api-integration
 ```
 
-(Replace `~/.claude/skills/` with `~/.codex/skills/` or `~/.cursor/skills/` as needed.)
+Substitute `~/.claude/` with `~/.codex/`, `~/.cursor/`, or your agent's home directory as needed. See the full agent list in [`vercel-labs/skills`](https://github.com/vercel-labs/skills#supported-agents).
 
 ## Verify
 
 In your agent, ask:
 
-> "How do I generate a 4K image with imini using google/nano-banana-pro?"
+> "How do I generate a 4K image with imini using `google/nano-banana-pro`?"
 
 The agent should consult the skill, ask for your API key (or detect `$IMINI_API_KEY`), fetch the OpenAPI spec, and produce a Python/Node/TypeScript/cURL snippet that:
 
@@ -97,47 +102,41 @@ The agent should consult the skill, ask for your API key (or detect `$IMINI_API_
 
 | Install method | Update command |
 |---|---|
-| `/plugin marketplace add` | `/plugin update imini@imini` inside Claude Code |
 | `npx skills add` | re-run the same `npx skills add ...` |
+| `/plugin marketplace add` | `/plugin update imini@imini` inside Claude Code |
 | `./setup` | `cd <repo> && git pull && ./setup` |
-| Manual symlink | `cd <repo> && git pull` (the symlink picks up changes automatically) |
+| Manual symlink | `cd <repo> && git pull` (the symlink follows the new content automatically) |
 
 ## Uninstall
 
 | Install method | Uninstall command |
 |---|---|
-| `/plugin marketplace add` | `/plugin uninstall imini@imini` inside Claude Code |
 | `npx skills add` | `npx skills remove imini-ai/imini-api-integration-skill` |
+| `/plugin marketplace add` | `/plugin uninstall imini@imini` inside Claude Code |
 | `./setup` | `rm ~/.<agent>/skills/imini-api-integration` (only removes the symlink) |
 | Manual symlink | same |
 
 ## Layout reference
 
-If you're curious what each path means:
-
 ```
-imini-api-integration-skill/
-├── SKILL.md                     # Single source of truth (root, for legacy standalone use)
-├── references/                  # Decision tree, error guide, integration templates
-├── scripts/                     # Live catalog fetcher
+imini-api-integration-skill/         # repo root = marketplace root
 ├── .claude-plugin/
-│   ├── plugin.json              # Claude Code single-plugin manifest
-│   └── marketplace.json         # /plugin marketplace add entry
-├── .codex-plugin/plugin.json    # Codex manifest
-├── .cursor-plugin/plugin.json   # Cursor manifest
-├── skills/
-│   └── api-integration/         # Plugin-style skill path (symlinks back to root)
-│       ├── SKILL.md             # → ../../SKILL.md
-│       ├── references           # → ../../references
-│       └── scripts              # → ../../scripts
-├── setup                        # Universal install script (symlink-based)
+│   └── marketplace.json             # Claude Code marketplace entry, source: "./plugins/imini"
+├── plugins/
+│   └── imini/                       # the imini plugin (plugin name = "imini")
+│       ├── .claude-plugin/
+│       │   └── plugin.json          # Claude Code plugin manifest
+│       └── skills/
+│           └── api-integration/     # the skill itself
+│               ├── SKILL.md         # main workflow
+│               ├── references/      # decision tree, error guide, code templates
+│               └── scripts/         # live catalog fetcher
+├── setup                            # universal bash installer
+├── INSTALL.md
+├── README.md
+├── README_CN.md
 ├── VERSION
-└── INSTALL.md                   # This file
+└── LICENSE
 ```
 
-Two valid skill paths coexist for backward compatibility:
-
-- `SKILL.md` at root — original standalone layout (still works for users who manually cloned into `~/.claude/skills/<name>/`)
-- `skills/api-integration/SKILL.md` — required by Claude Code's plugin format and used by all four install methods above
-
-Both resolve to the same content via symlinks.
+This layout matches the canonical Claude Code plugin marketplace structure (compare with Anthropic's own `claude-plugins-official` repo). `npx skills` recursively discovers `SKILL.md` inside the repo regardless of nesting, so the same layout serves both the Claude Code marketplace path and every other agent `npx skills` supports.
