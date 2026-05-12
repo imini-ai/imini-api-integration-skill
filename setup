@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+# imini-api-integration setup — first-time install for Claude Code, Codex, Cursor.
+# Idempotent: safe to run multiple times.
+set -euo pipefail
+
+# ─── Colors (degrade gracefully) ─────────────────────────────
+if [ -t 1 ] && command -v tput &>/dev/null && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
+  GREEN=$(tput setaf 2); YELLOW=$(tput setaf 3); RED=$(tput setaf 1); BOLD=$(tput bold); RESET=$(tput sgr0)
+else
+  GREEN=""; YELLOW=""; RED=""; BOLD=""; RESET=""
+fi
+ok()   { echo "${GREEN}✓${RESET} $1"; }
+warn() { echo "${YELLOW}!${RESET} $1"; }
+err()  { echo "${RED}✗${RESET} $1"; }
+info() { echo "${BOLD}→${RESET} $1"; }
+
+# ─── Locate repo root ────────────────────────────────────────
+SKILL_REPO="$(cd "$(dirname "$0")" && pwd)"
+SKILL_SRC="$SKILL_REPO/skills/api-integration"
+
+if [ ! -f "$SKILL_REPO/VERSION" ] || [ ! -e "$SKILL_SRC/SKILL.md" ]; then
+  err "Cannot find VERSION or skills/api-integration/SKILL.md — run this script from the repo root."
+  exit 1
+fi
+
+VERSION="$(tr -d '[:space:]' < "$SKILL_REPO/VERSION")"
+
+echo
+echo "${BOLD}imini API Integration setup — v$VERSION${RESET}"
+echo
+
+# ─── Parse flags ─────────────────────────────────────────────
+HOST_OVERRIDE=""
+INSTALL_NAME="imini-api-integration"
+DRY_RUN=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --host)
+      shift
+      [ $# -eq 0 ] && { err "--host requires a value: claude | codex | cursor"; exit 1; }
+      HOST_OVERRIDE="$1"; shift ;;
+    --host=*)
+      HOST_OVERRIDE="${1#--host=}"; shift ;;
+    --name)
+      shift
+      [ $# -eq 0 ] && { err "--name requires a value"; exit 1; }
+      INSTALL_NAME="$1"; shift ;;
+    --dry-run)
+      DRY_RUN=1; shift ;;
+    --help|-h)
+      cat <<EOF
+Usage: ./setup [options]
+
+Options:
+  --host <agent>   Force install path for: claude | codex | cursor
+                   (auto-detected if omitted)
+  --name <name>    Install directory name under <agent>/skills/
+                   (default: imini-api-integration)
+  --dry-run        Print what would happen without modifying anything
+  --help           Show this message
+
+Idempotent: re-runs replace stale symlinks; existing real directories are
+backed up to <path>.bak.<timestamp> before being replaced.
+EOF
+      exit 0 ;;
+    *)
+      warn "Unknown flag: $1"; shift ;;
+  esac
+done
+
+# ─── Detect agent host ───────────────────────────────────────
+detect_host() {
+  if [ -n "$HOST_OVERRIDE" ]; then echo "$HOST_OVERRIDE"; return; fi
+  if [ -d "$HOME/.claude" ]; then echo "claude"; return; fi
+  if [ -d "$HOME/.codex" ];  then echo "codex";  return; fi
+  if [ -d "$HOME/.cursor" ]; then echo "cursor"; return; fi
+  echo "unknown"
+}
+
+HOST="$(detect_host)"
+case "$HOST" in
+  claude) TARGET_DIR="$HOME/.claude/skills/$INSTALL_NAME" ;;
+  codex)  TARGET_DIR="$HOME/.codex/skills/$INSTALL_NAME" ;;
+  cursor) TARGET_DIR="$HOME/.cursor/skills/$INSTALL_NAME" ;;
+  unknown)
+    warn "Could not auto-detect agent host."
+    info "Re-run with --host <claude|codex|cursor>."
+    exit 1 ;;
+  *)
+    err "Unknown host: $HOST"; exit 1 ;;
+esac
+
+ok "Detected host: $HOST"
+ok "Source: $SKILL_SRC"
+ok "Target: $TARGET_DIR"
+echo
+
+# ─── Sanity: avoid installing onto ourselves ────────────────
+SKILL_REPO_REAL="$(cd "$SKILL_REPO" && pwd -P)"
+TARGET_PARENT="$(dirname "$TARGET_DIR")"
+if [ -d "$TARGET_DIR" ]; then
+  TARGET_REAL="$(cd "$TARGET_DIR" && pwd -P 2>/dev/null || echo "")"
+  if [ "$TARGET_REAL" = "$SKILL_REPO_REAL" ]; then
+    warn "The install target IS the repo root."
+    info "This happens when the repo is checked out directly into the agent's skills directory."
+    info "Resolution: move the repo elsewhere (e.g. ~/projects/imini-api-integration-skill) and re-run setup."
+    info "The setup will then symlink skills/api-integration -> $TARGET_DIR."
+    exit 1
+  fi
+fi
+
+# ─── Install (symlink) ──────────────────────────────────────
+do_install() {
+  local src="$1" dst="$2"
+  if [ -L "$dst" ]; then
+    if [ "$(readlink "$dst")" = "$src" ]; then
+      ok "Already symlinked: $dst -> $src"
+      return
+    fi
+    if [ "$DRY_RUN" -eq 1 ]; then info "[dry-run] would replace stale symlink $dst"; return; fi
+    rm "$dst"
+    ln -s "$src" "$dst"
+    ok "Replaced stale symlink: $dst -> $src"
+    return
+  fi
+  if [ -e "$dst" ]; then
+    local backup="$dst.bak.$(date +%s)"
+    if [ "$DRY_RUN" -eq 1 ]; then info "[dry-run] would back up $dst -> $backup, then symlink"; return; fi
+    mv "$dst" "$backup"
+    warn "Existing dir backed up to: $backup"
+  fi
+  if [ "$DRY_RUN" -eq 1 ]; then info "[dry-run] would create symlink $dst -> $src"; return; fi
+  mkdir -p "$TARGET_PARENT"
+  ln -s "$src" "$dst"
+  ok "Installed: $dst -> $src"
+}
+
+do_install "$SKILL_SRC" "$TARGET_DIR"
+
+echo
+
+if [ "$DRY_RUN" -eq 1 ]; then
+  ok "Dry-run complete. Re-run without --dry-run to apply."
+  exit 0
+fi
+
+ok "Done. Restart your agent (or run /reload-plugins in Claude Code) to pick up the skill."
+echo
+
+# ─── Quick verification ─────────────────────────────────────
+if [ -e "$TARGET_DIR/SKILL.md" ]; then
+  ok "Verified: $TARGET_DIR/SKILL.md is accessible"
+else
+  err "Post-install check failed: SKILL.md not found at $TARGET_DIR/"
+  err "Check the symlink and the source path manually."
+  exit 1
+fi
