@@ -168,6 +168,10 @@ The catalog script uses only the Python standard library — no `pip install` re
 imini-api-integration-skill/         # repo root = marketplace root
 ├── .claude-plugin/
 │   └── marketplace.json             # Claude Code marketplace entry, source: "./plugins/imini"
+├── .codex-plugin/
+│   └── plugin.json                  # Codex Agent-readable manifest (skills hint + install command)
+├── .cursor-plugin/
+│   └── plugin.json                  # Cursor manifest (skills path hint)
 ├── plugins/
 │   └── imini/                       # the imini plugin (plugin name = "imini")
 │       ├── .claude-plugin/
