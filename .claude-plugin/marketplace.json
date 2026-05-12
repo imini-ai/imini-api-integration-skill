@@ -7,16 +7,9 @@
   "plugins": [
     {
       "name": "imini",
-      "source": "./",
-      "version": "0.2.0",
-      "description": "imini Open Platform integration helper — generates production-ready async code for image/video generation across nano-banana, gpt-image-2, kling, seedance, happyhorse, and more.",
-      "skills": [
-        {
-          "name": "api-integration",
-          "path": "skills/api-integration",
-          "invoke": "/imini:api-integration"
-        }
-      ]
+      "source": "./plugins/imini",
+      "version": "0.3.0",
+      "description": "imini Open Platform integration helper — generates production-ready async code for image/video generation across nano-banana, gpt-image-2, kling, seedance, happyhorse, and more."
     }
   ]
 }

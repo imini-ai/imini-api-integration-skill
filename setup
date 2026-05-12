@@ -16,10 +16,10 @@ info() { echo "${BOLD}→${RESET} $1"; }
 
 # ─── Locate repo root ────────────────────────────────────────
 SKILL_REPO="$(cd "$(dirname "$0")" && pwd)"
-SKILL_SRC="$SKILL_REPO/skills/api-integration"
+SKILL_SRC="$SKILL_REPO/plugins/imini/skills/api-integration"
 
 if [ ! -f "$SKILL_REPO/VERSION" ] || [ ! -e "$SKILL_SRC/SKILL.md" ]; then
-  err "Cannot find VERSION or skills/api-integration/SKILL.md — run this script from the repo root."
+  err "Cannot find VERSION or plugins/imini/skills/api-integration/SKILL.md — run this script from the repo root."
   exit 1
 fi
 
@@ -104,7 +104,7 @@ if [ -d "$TARGET_DIR" ]; then
     warn "The install target IS the repo root."
     info "This happens when the repo is checked out directly into the agent's skills directory."
     info "Resolution: move the repo elsewhere (e.g. ~/projects/imini-api-integration-skill) and re-run setup."
-    info "The setup will then symlink skills/api-integration -> $TARGET_DIR."
+    info "The setup will then symlink plugins/imini/skills/api-integration -> $TARGET_DIR."
     exit 1
   fi
 fi
