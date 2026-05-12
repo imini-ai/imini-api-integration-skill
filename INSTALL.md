@@ -37,6 +37,37 @@ npx skills add imini-ai/imini-api-integration-skill --copy                    # 
 npx skills add imini-ai/imini-api-integration-skill -g                        # global (~/.<agent>/) vs project (.<agent>/)
 ```
 
+### Troubleshooting: `npx` fails with `EEXIST` / npm cache error
+
+If you see something like:
+
+```
+npm error code EEXIST
+npm error syscall rename
+npm error path ...
+```
+
+That's a stale npm cache, unrelated to this repo. Clean it and retry:
+
+```bash
+npm cache clean --force
+npx skills add imini-ai/imini-api-integration-skill
+```
+
+If you still want a Node-free path, jump to **#3 `./setup`** below.
+
+### Codex fallback: bundled installer (`install-skill-from-github.py`)
+
+If you're on Codex and your Agent falls back to Codex's bundled installer at `~/.codex/skills/.system/skill-installer/`, it requires the skill path **explicitly** — it does not auto-discover `SKILL.md` outside the repo root. Tell it (or paste this when prompted):
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+    --repo imini-ai/imini-api-integration-skill \
+    --path plugins/imini/skills/api-integration
+```
+
+The `--path` is the same value declared as `skills` in our `.codex-plugin/plugin.json`, so a Codex Agent that reads that manifest first should already derive this command without you typing it. Result lands at `~/.codex/skills/api-integration/`. Restart Codex to pick it up.
+
 ## 2. Claude Code marketplace (native flow)
 
 Inside Claude Code:
@@ -122,6 +153,10 @@ The agent should consult the skill, ask for your API key (or detect `$IMINI_API_
 imini-api-integration-skill/         # repo root = marketplace root
 ├── .claude-plugin/
 │   └── marketplace.json             # Claude Code marketplace entry, source: "./plugins/imini"
+├── .codex-plugin/
+│   └── plugin.json                  # Codex Agent-readable manifest (skills hint + install command)
+├── .cursor-plugin/
+│   └── plugin.json                  # Cursor manifest (skills path hint)
 ├── plugins/
 │   └── imini/                       # the imini plugin (plugin name = "imini")
 │       ├── .claude-plugin/
@@ -140,3 +175,5 @@ imini-api-integration-skill/         # repo root = marketplace root
 ```
 
 This layout matches the canonical Claude Code plugin marketplace structure (compare with Anthropic's own `claude-plugins-official` repo). `npx skills` recursively discovers `SKILL.md` inside the repo regardless of nesting, so the same layout serves both the Claude Code marketplace path and every other agent `npx skills` supports.
+
+The `.codex-plugin/` and `.cursor-plugin/` manifests don't currently have known deterministic consumers (Codex's bundled `install-skill-from-github.py` ignores them, and `cursor.com/schemas/cursor-plugin/plugin.json` returns HTTP 500). They are kept as **AI-Agent-readable hints** — Codex Agents that inspect the repo before running the bundled installer will see `"skills": "./plugins/imini/skills"` and the `install.command` example, and can derive the correct `--path` argument without listing the tree first.
