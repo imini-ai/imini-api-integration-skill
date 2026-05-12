@@ -1,0 +1,24 @@
+{
+  "$schema": "https://cursor.com/schemas/cursor-plugin/plugin.json",
+  "name": "imini",
+  "displayName": "imini API Integration",
+  "version": "0.2.0",
+  "description": "imini Open Platform integration — async image/video generation code helper across nano-banana, gpt-image-2, kling, seedance, happyhorse, and more.",
+  "author": {
+    "name": "imini",
+    "email": "support@imini.com"
+  },
+  "publisher": "imini",
+  "homepage": "https://imini.ai",
+  "repository": "https://github.com/imini-ai/imini-api-integration-skill",
+  "license": "MIT",
+  "category": "ai-content",
+  "keywords": [
+    "imini",
+    "aigc",
+    "image-generation",
+    "video-generation",
+    "async-task",
+    "openapi"
+  ]
+}

@@ -61,15 +61,20 @@ delay = min(cap, base * 1.5^attempt) * (0.8 + 0.4 * random())
 
 Keep one **hard timeout** per task, measured from submit to `succeeded`. Polling retries share the budget.
 
-| Model type | Suggested timeout |
-|---|---|
-| Image (1K) | 60s |
-| Image (4K) | 120s |
-| Video, 5s output | 180s |
-| Video, 10s output | 360s |
-| Video, 15s output | 600s |
+This table is the **authoritative source** of timeout defaults — `SKILL.md` and `workflow.md` defer to it.
 
-Scale up if the user reports timeouts; imini service latency varies by model and load.
+| Scenario | Suggested timeout |
+|---|---|
+| Image 1K | 120s |
+| Image 2K | 300s |
+| Image 4K | 600s |
+| Image hard cap | **900s (15 min)** |
+| Video, 5s output | 300s |
+| Video, 10s output | 600s |
+| Video, 15s output | 900s |
+| Video with reference video / long duration | up to **1800s (30 min)** |
+
+These defaults are intentionally generous — queue depth and cold-start variance can swing tail latency by minutes. Tighten on a per-deployment basis only after measuring p99 from real traffic. Treat values above as the cap, not the expected duration.
 
 ## Logging checklist
 

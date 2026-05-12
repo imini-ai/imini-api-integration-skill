@@ -1,6 +1,6 @@
 ---
 name: imini-api-integration
-description: Use this skill whenever the user needs to integrate AIGC image or video generation into code — text-to-image, image editing with references, text-to-video, image-to-video, first/last frame, reference video, or multimodal (image + video + audio) generation. Auto-selects the right imini model, estimates credit cost, and generates production-ready asynchronous task code (submit + poll). Triggers on mentions of imini, openapi.imini.ai, or any imini model id (nano-banana, nano-banana-pro, nano-banana-2, kling-v3, kling-v3-omni, seedance-2.0, seedance-2.0-fast).
+description: Use this skill whenever the user needs to integrate AIGC image or video generation into code — text-to-image, image editing with references, text-to-video, image-to-video, first/last frame, reference video, motion control, or multimodal (image + video + audio) generation. Auto-selects the right imini model, estimates credit cost, and generates production-ready asynchronous task code (submit + poll). Triggers on mentions of imini, openapi.imini.ai, or any imini model id (nano-banana, nano-banana-pro, nano-banana-2, gpt-image-2, kling-v3, kling-v3-omni, kling-v3-motion-control, seedance-2.0, seedance-2.0-fast, happyhorse-1.0).
 ---
 
 # imini Open Platform API Integration
@@ -83,13 +83,13 @@ Get explicit confirmation before generating code.
 
 ### Step 5. Fetch the full OpenAPI spec
 
-Once the model is confirmed, WebFetch the `Spec:` URL from the catalog record, which points to the YAML endpoint — e.g.:
+Once the model is confirmed, fetch the YAML at the `Spec:` URL from the catalog record — e.g.:
 
 ```
 https://docs.imini.ai/en/openapi/images/nano-banana-pro.yaml
 ```
 
-Use the YAML endpoint (not the `.md` endpoint) — it's clean OpenAPI 3.1.0 and parses deterministically.
+Use whatever HTTP/fetch tool your agent provides (Claude Code: `WebFetch`; Codex / Cursor / others: their equivalent; or fall back to `curl` via shell). The YAML endpoint is clean OpenAPI 3.1.0 — prefer it over the `.md` endpoint because it parses deterministically.
 
 ### Step 6. Generate the integration code
 
@@ -97,7 +97,7 @@ Use the templates in `references/integration_examples.md`. Every generated code 
 
 1. **Submit function** — POST to the generation endpoint, return `task_id`
 2. **Polling loop** — GET the task-query endpoint with exponential backoff until `status === "succeeded"` or `status === "failed"`, with a hard timeout. Never branch on `completed` / `running` — those values do not exist in this API.
-3. **Result extraction** — image tasks return `images[].url`; video tasks return `videos[].url` (plus `width`, `height`, and for videos `duration`). Always read the array even if it has a single element.
+3. **Result extraction** — image tasks return `images[]`; video tasks return `videos[]`. Each element has `url` plus `width` / `height` (videos also include `duration`). **Always iterate the array — never hardcode `[0]`.** Some calls return multiple outputs (e.g. `n` / `num_images` parameters on image models, multi-segment outputs on certain video models). Indexing the first element silently drops the rest.
 4. **Error handling** — see `references/errors.md`
 
 Supported output languages (initial):
@@ -110,8 +110,9 @@ Supported output languages (initial):
 ### Step 7. Explain and give production tips
 
 - Wire the key via environment variable, never hard-code
-- Polling start interval: images ~2s, videos ~5s; exponential backoff to a cap
-- Timeout defaults: images ~60s, videos up to ~600s depending on duration
+- Polling start interval: images ~2s, videos ~5s; exponential backoff with ±20% jitter to a cap
+- On HTTP 429: bump the backoff floor to ≥5s before the next attempt
+- Timeouts: see `references/errors.md` for the authoritative per-scenario table. Defaults are generous (images up to 15 min, videos up to 30 min) to absorb queue depth and cold-start variance — tighten on a per-deployment basis only after measuring p99
 - Concurrency: use a semaphore or worker pool — don't block on sync polling loops in parallel
 - Cost control: log `task_id` + estimated credit cost per submission; set per-user quotas upstream
 

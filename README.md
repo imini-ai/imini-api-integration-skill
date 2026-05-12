@@ -3,23 +3,27 @@
 </h1>
 
 <p align="center">
-  <em>🚀 The official Claude Code skill for imini open platform — AIGC image & video generation APIs</em>
+  <em>🚀 The official skill for imini open platform — works with Claude Code, Codex, Cursor, and other agents that load Markdown-based skills</em>
 </p>
 
 <p align="center">
-  <a href="./README_CN.md">中文文档</a> · English
+  <a href="./README_CN.md">中文文档</a> · English · <a href="./INSTALL.md">Install</a>
 </p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"><img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg" /></a>
-  <a href="https://claude.com/claude-code"><img alt="Claude Code" src="https://img.shields.io/badge/Claude-Code-8A3FFC.svg" /></a>
-  <a href="https://docs.imini.ai"><img alt="Models" src="https://img.shields.io/badge/Models-7-green.svg" /></a>
+  <a href="https://claude.com/claude-code"><img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-supported-8A3FFC.svg" /></a>
+  <a href="#"><img alt="Codex" src="https://img.shields.io/badge/Codex-supported-10A37F.svg" /></a>
+  <a href="#"><img alt="Cursor" src="https://img.shields.io/badge/Cursor-supported-000000.svg" /></a>
+  <a href="https://docs.imini.ai"><img alt="Models" src="https://img.shields.io/badge/Models-10-green.svg" /></a>
   <a href="https://imini.ai"><img alt="Platform" src="https://img.shields.io/badge/Platform-imini.ai-0070F3.svg" /></a>
 </p>
 
 ## ✨ What is This?
 
-A Claude Code skill that **automatically** picks the right imini model for your image or video generation task, estimates credit cost, and generates production-ready **async** integration code (submit + poll + result extraction) in your preferred language. No model comparison, no boilerplate, no guesswork.
+A cross-agent skill that **automatically** picks the right imini model for your image or video generation task, estimates credit cost, and generates production-ready **async** integration code (submit + poll + result extraction) in your preferred language. No model comparison, no boilerplate, no guesswork.
+
+Works in any agent that loads Markdown skills — Claude Code, Codex, Cursor, and others. See [INSTALL.md](./INSTALL.md) for one-line install across all of them.
 
 ## 🎯 Key Features
 
@@ -40,6 +44,7 @@ A Claude Code skill that **automatically** picks the right imini model for your 
 | `google/nano-banana` | Gemini 2.5 Flash Image | 🏃 Fast, low-cost, 1K |
 | `google/nano-banana-pro` | Gemini 3 Pro Image | 🎯 Up to 4K, 14 reference images, asset / style refs |
 | `google/nano-banana-2` | Gemini 3.1 Flash Image | 🎚️ 512 / 1K / 2K / 4K tiers, 14 reference images |
+| `openai/gpt-image-2` | OpenAI gpt-image-2 | 🎛️ 1K / 2K / 4K × low / medium / high quality (orthogonal) |
 
 ### 🎬 Video Models
 
@@ -47,32 +52,35 @@ A Claude Code skill that **automatically** picks the right imini model for your 
 |---|---|---|
 | `kling/kling-v3` | Kling 3.0 | 🎞️ Text/image to video, first-last-frame, multi-reference |
 | `kling/kling-v3-omni` | Kling 3.0 Omni | 🎥 Adds **reference-video** input on top of v3, up to 1080P |
+| `kling/kling-v3-motion-control` | Kling 3.0 Motion Control | 🕺 Replicate motion from a reference video onto a character |
 | `doubao/seedance-2.0` | Seedance 2.0 | 🧬 Multimodal reference (image + video + audio), 480P / 720P |
 | `doubao/seedance-2.0-fast` | Seedance 2.0 Fast | 💸 Same features as 2.0, lower cost, 480P / 720P |
+| `dashscope/happyhorse-1.0` | HappyHorse 1.0 | ✂️ Text/image/reference-to-video AND **video editing** in one model |
 
-> 📡 Live catalog: https://docs.imini.ai/llms.txt
+> 📡 Live catalog (always current): https://docs.imini.ai/llms.txt — fetched by the bundled `fetch_imini_catalog.py` script so this list never goes stale in production.
 
 ## 🚀 Quick Start
 
 ### Installation
 
-Share this repository URL with Claude Code:
+See [INSTALL.md](./INSTALL.md) for all four supported paths. The fastest:
 
 ```
-Install this skill: https://github.com/imini-ai/imini-api-integration-skill
-```
+# Claude Code (inside the agent)
+/plugin marketplace add imini-ai/imini-api-integration-skill
+/plugin install imini@imini
 
-Claude Code installs it automatically.
+# Or cross-agent one-liner (Claude Code / Codex / Cursor)
+npx skills add imini-ai/imini-api-integration-skill
+```
 
 ### Verify
 
-Ask Claude Code:
+In your agent, ask:
 
-```
-What skills are available?
-```
+> "How do I generate a 4K image with imini using `google/nano-banana-pro`?"
 
-You should see `imini-api-integration` in the list.
+The agent should pick up the skill, ask for your API key (or use `$IMINI_API_KEY`), and produce a runnable async submit-and-poll snippet.
 
 ### Basic Usage
 
@@ -153,14 +161,21 @@ The catalog script uses only the Python standard library — no `pip install` re
 
 ```
 imini-api-integration-skill/
-├── SKILL.md                      # Main skill workflow (7 steps)
+├── SKILL.md                       # Main skill workflow (7 steps) — root path, for legacy standalone use
 ├── scripts/
-│   └── fetch_imini_catalog.py    # Catalog fetcher / parser (stdlib-only)
-└── references/
-    ├── workflow.md               # Async task state machine + polling strategy
-    ├── model_selection.md        # Decision tree + cost tables
-    ├── integration_examples.md   # Python / Node.js / TypeScript / cURL templates
-    └── errors.md                 # Error codes + retry policy
+│   └── fetch_imini_catalog.py     # Live catalog fetcher / parser, parses pricing too (stdlib-only)
+├── references/
+│   ├── workflow.md                # Async task state machine + polling strategy
+│   ├── model_selection.md         # Decision tree (capability map; price is fetched live)
+│   ├── integration_examples.md    # Python (sync+async) / Node.js / TypeScript / cURL templates
+│   └── errors.md                  # Authoritative timeout table + error codes + retry policy
+├── skills/api-integration/        # Plugin-style skill path — symlinks back to root for cross-agent installers
+├── .claude-plugin/                # Claude Code plugin + marketplace manifests
+├── .codex-plugin/plugin.json      # Codex manifest
+├── .cursor-plugin/plugin.json     # Cursor manifest
+├── setup                          # Universal symlink-based installer (auto-detects host)
+├── INSTALL.md                     # All four install paths and update / uninstall instructions
+└── VERSION
 ```
 
 ## 🔑 API Key
@@ -213,8 +228,9 @@ Get your imini API key (one key works for every model):
 
 ## ✅ Requirements
 
-- 🐍 Python 3.8+ (catalog script — stdlib only)
-- 🤖 [Claude Code](https://claude.com/claude-code)
+- 🐍 Python 3.8+ — for the catalog script (stdlib only, no `pip install`)
+- 🤖 An agent that loads Markdown skills — [Claude Code](https://claude.com/claude-code), Codex, Cursor, or similar
+- (Generated code only) Node.js 18+ if you choose the JavaScript/TypeScript templates (native `fetch`)
 
 ## 🔗 Links
 

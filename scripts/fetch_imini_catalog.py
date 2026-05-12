@@ -27,10 +27,11 @@ LINE_RE = re.compile(
     r'^-\s+(?P<category>.+?)\s+'
     r'\[(?P<name>.+?)\]\((?P<doc_url>[^)]+)\):\s*'
     r'(?P<description>.*?)'
+    r'(?:\s+Pricing[^:]*?:\s+(?P<pricing>.+?))?'
     r'(?:\s+Spec:\s+(?P<spec_url>\S+))?$'
 )
 
-MODEL_ID_RE = re.compile(r'(?:google|kling|doubao)/[a-z0-9.\-]+')
+MODEL_ID_RE = re.compile(r'[a-z][a-z0-9_-]*/[a-z0-9.\-]+')
 
 API_SECTIONS = {
     "Task Query": "task-query",
@@ -92,7 +93,7 @@ def filter_records(
     return out
 
 
-def format_human(records: List[Dict]) -> str:
+def format_human(records: List[Dict], show_pricing: bool = True) -> str:
     lines: List[str] = []
     for r in records:
         lines.append(f"[{r['type']}] {r['name']}")
@@ -102,6 +103,8 @@ def format_human(records: List[Dict]) -> str:
         if r.get("spec_url"):
             lines.append(f"  Spec:     {r['spec_url']}")
         lines.append(f"  Summary:  {r['description']}")
+        if show_pricing and r.get("pricing"):
+            lines.append(f"  Pricing:  {r['pricing']}")
         lines.append("")
     return "\n".join(lines)
 
@@ -129,6 +132,11 @@ def main() -> None:
         default=LLMS_URL,
         help=f"Override the llms.txt URL (default: {LLMS_URL}).",
     )
+    parser.add_argument(
+        "--no-pricing",
+        action="store_true",
+        help="Suppress the 'Pricing' line in human output (pricing is always included in --json).",
+    )
     args = parser.parse_args()
 
     try:
@@ -146,7 +154,7 @@ def main() -> None:
     if args.json:
         print(json.dumps(records, indent=2, ensure_ascii=False))
     else:
-        print(format_human(records))
+        print(format_human(records, show_pricing=not args.no_pricing))
 
 
 if __name__ == "__main__":

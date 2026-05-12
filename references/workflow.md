@@ -53,8 +53,9 @@ A single key works for every model. Get keys at https://imini.ai/api-keys.
 
 - **Start interval** — images: 2s; videos: 5s
 - **Backoff** — exponential, multiplier 1.5, cap at 30s
-- **Hard timeout** — images: 60s; videos: 120s (5s output), 600s (15s output). Scale with requested duration.
+- **Hard timeout** — images cap at 15 min (900s), videos cap at 30 min (1800s). For the per-scenario table (1K / 2K / 4K, video duration tiers, reference-video case), see `errors.md` — that's the authoritative source
 - **Jitter** — add ±20% jitter to the interval to avoid synchronized retries when many tasks are in flight
+- **HTTP 429** — bump the next-interval floor to ≥5s before applying jitter
 
 ## Timeouts and retries
 
