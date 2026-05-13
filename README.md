@@ -159,7 +159,7 @@ Direct use of the parser:
 
 ```bash
 # List everything
-python3 skills/api-integration/scripts/fetch_imini_catalog.py
+python3 skills/imini-generate/scripts/fetch_imini_catalog.py
 
 # Filter by type
 python3 .../scripts/fetch_imini_catalog.py --type video
@@ -221,7 +221,7 @@ imini-api-integration-skill/
 ├── .codex-plugin/plugin.json        # Codex Agent-readable manifest
 ├── .cursor-plugin/plugin.json       # Cursor manifest
 ├── skills/
-│   └── api-integration/             # the skill — installed at ~/.<agent>/skills/api-integration/
+│   └── imini-generate/             # the skill — installed at ~/.<agent>/skills/imini-generate/
 │       ├── SKILL.md                 # Workflow entry point (Path A: run script / Path B: codegen)
 │       ├── references/              # Path B (codegen) only
 │       │   ├── workflow.md            # Async task state machine + polling strategy

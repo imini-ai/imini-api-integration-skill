@@ -41,7 +41,7 @@ VIDEO_SUBMIT = "/v1/videos/generate"
 IMAGE_QUERY = "/v1/images/tasks/{}"
 VIDEO_QUERY = "/v1/videos/tasks/{}"
 
-# Default hard timeouts (see plugins/imini/skills/api-integration/references/errors.md)
+# Default hard timeouts (see skills/imini-generate/references/errors.md)
 IMAGE_TIMEOUT_DEFAULT = 900   # 15 min
 VIDEO_TIMEOUT_DEFAULT = 1800  # 30 min
 
@@ -325,7 +325,7 @@ def resolve_api_key(cli_value: Optional[str], *, logger: Logger) -> str:
 def _cache_dir() -> Path:
     xdg = os.environ.get("XDG_CACHE_HOME")
     base = Path(xdg) if xdg else Path.home() / ".cache"
-    d = base / "imini-api-integration"
+    d = base / "imini-generate"
     d.mkdir(parents=True, exist_ok=True)
     return d
 

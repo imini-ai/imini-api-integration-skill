@@ -157,7 +157,7 @@ def cmd_generate(args: argparse.Namespace) -> int:
 
 
 def _default_image_timeout(resolution: str) -> int:
-    # Mirrors plugins/imini/skills/api-integration/references/errors.md table
+    # Mirrors skills/imini-generate/references/errors.md table
     return {
         "512": 120,
         "1K": 120,

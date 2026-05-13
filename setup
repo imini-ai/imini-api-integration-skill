@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# imini-api-integration setup — first-time install for Claude Code, Codex, Cursor.
+# imini-generate setup — first-time install for Claude Code, Codex, Cursor.
 # Idempotent: safe to run multiple times.
 set -euo pipefail
 
@@ -16,10 +16,10 @@ info() { echo "${BOLD}→${RESET} $1"; }
 
 # ─── Locate repo root ────────────────────────────────────────
 SKILL_REPO="$(cd "$(dirname "$0")" && pwd)"
-SKILL_SRC="$SKILL_REPO/skills/api-integration"
+SKILL_SRC="$SKILL_REPO/skills/imini-generate"
 
 if [ ! -f "$SKILL_REPO/VERSION" ] || [ ! -e "$SKILL_SRC/SKILL.md" ]; then
-  err "Cannot find VERSION or skills/api-integration/SKILL.md — run this script from the repo root."
+  err "Cannot find VERSION or skills/imini-generate/SKILL.md — run this script from the repo root."
   exit 1
 fi
 
@@ -31,7 +31,7 @@ echo
 
 # ─── Parse flags ─────────────────────────────────────────────
 HOST_OVERRIDE=""
-INSTALL_NAME="imini-api-integration"
+INSTALL_NAME="imini-generate"
 DRY_RUN=0
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -55,7 +55,7 @@ Options:
   --host <agent>   Force install path for: claude | codex | cursor
                    (auto-detected if omitted)
   --name <name>    Install directory name under <agent>/skills/
-                   (default: imini-api-integration)
+                   (default: imini-generate)
   --dry-run        Print what would happen without modifying anything
   --help           Show this message
 
@@ -104,7 +104,7 @@ if [ -d "$TARGET_DIR" ]; then
     warn "The install target IS the repo root."
     info "This happens when the repo is checked out directly into the agent's skills directory."
     info "Resolution: move the repo elsewhere (e.g. ~/projects/imini-api-integration-skill) and re-run setup."
-    info "The setup will then symlink skills/api-integration -> $TARGET_DIR."
+    info "The setup will then symlink skills/imini-generate -> $TARGET_DIR."
     exit 1
   fi
 fi
