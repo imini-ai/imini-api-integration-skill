@@ -118,11 +118,36 @@ Substitute `~/.claude/` with `~/.codex/`, `~/.cursor/`, or your agent's home dir
 
 ## Verify
 
-In your agent, ask:
+The skill has two operating modes — both should work after install.
 
-> "How do I generate a 4K image with imini using `google/nano-banana-pro`?"
+### Path A — one-shot generation (bundled scripts)
 
-The agent should consult the skill, ask for your API key (or detect `$IMINI_API_KEY`), fetch the OpenAPI spec, and produce a Python/Node/TypeScript/cURL snippet that:
+For "generate me an image / video right now" the skill ships executable scripts. Quickest possible smoke test (after `export IMINI_API_KEY='sk-...'`):
+
+```bash
+# Sanity check: list available models (works offline after first 24h cache hit)
+python3 ~/.<agent>/skills/imini-api-integration/scripts/generate_image.py --list-models
+
+# Generate a 1K image (~50 credits, fastest model)
+python3 ~/.<agent>/skills/imini-api-integration/scripts/generate_image.py \
+    --model google/nano-banana \
+    --prompt "a tiny test image" \
+    --output ./test.png
+```
+
+Substitute `<agent>` with `claude` / `codex` / `cursor` as appropriate. In conversation, just ask:
+
+> "Generate a test image with imini, nano-banana."
+
+The agent should detect Path A (one-shot) and run the bundled script directly — no Python codegen.
+
+### Path B — integration code for your project
+
+Ask:
+
+> "How do I generate a 4K image with imini using `google/nano-banana-pro` from my Python app?"
+
+The agent should detect Path B (codegen) and produce a Python/Node/TS/cURL snippet that:
 
 - Submits to `/v1/images/generate`
 - Polls `/v1/images/tasks/{task_id}` with jittered backoff, checking for `succeeded` / `failed` (NOT `completed` / `running`)

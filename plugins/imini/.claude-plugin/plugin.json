@@ -1,6 +1,6 @@
 {
   "name": "imini",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "imini Open Platform integration helper — selects the right AIGC image/video model, estimates credit cost, and generates production-ready async task code (submit + poll) for nano-banana, gpt-image-2, kling, seedance, happyhorse, and more.",
   "author": {
     "name": "imini",
