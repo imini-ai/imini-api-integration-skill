@@ -159,21 +159,57 @@ Direct use of the parser:
 
 ```bash
 # List everything
-python3 scripts/fetch_imini_catalog.py
+python3 plugins/imini/skills/api-integration/scripts/fetch_imini_catalog.py
 
 # Filter by type
-python3 scripts/fetch_imini_catalog.py --type video
+python3 .../scripts/fetch_imini_catalog.py --type video
 
-# One specific model
-python3 scripts/fetch_imini_catalog.py --model google/nano-banana-pro
+# One specific model (with pricing)
+python3 .../scripts/fetch_imini_catalog.py --model google/nano-banana-pro
 
 # JSON for tooling
-python3 scripts/fetch_imini_catalog.py --json
+python3 .../scripts/fetch_imini_catalog.py --json
+```
+
+The Path A generate scripts have a built-in `--list-models` subcommand that wraps the same logic.
+
+### 🛡️ --print-request debugging mode
+
+Path A scripts support `--print-request` — **no API call, no key needed** — to preview the exact JSON body that would be POST'd:
+
+```bash
+python3 .../scripts/generate_image.py \
+    --model google/nano-banana-pro \
+    --prompt "test" --resolution 4K \
+    --print-request
+
+# Output:
+# {
+#   "model": "google/nano-banana-pro",
+#   "prompt": "test",
+#   "resolution": "4K"
+# }
+```
+
+base64-encoded local images in reference fields are auto-truncated in the preview so the output stays readable.
+
+### ⏱️ --async + poll resume
+
+Long-running video tasks can be fire-and-forget with `--async`. Return the task_id immediately, close your laptop, resume later from any session with `poll_video_task.py`:
+
+```bash
+TASK_ID=$(python3 .../scripts/generate_video.py \
+    --model doubao/seedance-2.0 \
+    --prompt "..." --duration 15 --reference-video ./ref.mp4 \
+    --async)
+
+# Later...
+python3 .../scripts/poll_video_task.py --task-id "$TASK_ID" --output ./out.mp4
 ```
 
 ### 📦 Zero External Dependencies
 
-The catalog script uses only the Python standard library — no `pip install` required.
+All bundled scripts use only the Python 3.8+ standard library (`urllib` / `json` / `argparse` / `base64` / `mimetypes` / `pathlib`). **No `pip install` required.**
 
 ## 📚 Documentation Structure
 
