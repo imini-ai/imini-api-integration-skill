@@ -28,7 +28,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                    help="Output file or directory. Default: <task_id>.png in cwd.")
     p.add_argument("--timeout", type=float, default=imini.IMAGE_TIMEOUT_DEFAULT,
                    metavar="SECONDS",
-                   help=f"Hard timeout (default: {imini.IMAGE_TIMEOUT_DEFAULT}s = 15 min).")
+                   help=f"Hard timeout (default: {imini.IMAGE_TIMEOUT_DEFAULT}s = 10 min).")
     p.add_argument("--no-download", action="store_true",
                    help="Don't download. Print URLs to stdout instead.")
     p.add_argument("--api-key", help="Override $IMINI_API_KEY (DISCOURAGED).")

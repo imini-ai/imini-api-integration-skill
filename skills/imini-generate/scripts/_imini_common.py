@@ -41,8 +41,8 @@ VIDEO_SUBMIT = "/v1/videos/generate"
 IMAGE_QUERY = "/v1/images/tasks/{}"
 VIDEO_QUERY = "/v1/videos/tasks/{}"
 
-# Default hard timeouts (see skills/imini-generate/references/errors.md)
-IMAGE_TIMEOUT_DEFAULT = 900   # 15 min
+# Default hard timeouts — flat across all models, resolutions, durations.
+IMAGE_TIMEOUT_DEFAULT = 600   # 10 min
 VIDEO_TIMEOUT_DEFAULT = 1800  # 30 min
 
 CACHE_TTL_SECONDS = 24 * 60 * 60  # 24 h

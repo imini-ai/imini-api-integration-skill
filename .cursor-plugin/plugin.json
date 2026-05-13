@@ -2,7 +2,7 @@
   "$schema": "https://cursor.com/schemas/cursor-plugin/plugin.json",
   "name": "imini",
   "displayName": "imini API Integration",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "imini Open Platform integration — async image/video generation code helper across nano-banana, gpt-image-2, kling, seedance, happyhorse, and more.",
   "author": {
     "name": "imini",

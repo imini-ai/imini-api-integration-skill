@@ -128,7 +128,8 @@ def cmd_generate(args: argparse.Namespace) -> int:
         print(task_id)
         return 0
 
-    timeout = args.timeout if args.timeout is not None else _default_video_timeout(args)
+    # Flat 30-minute default — covers worst-case ref-video + long-duration
+    timeout = args.timeout if args.timeout is not None else imini.VIDEO_TIMEOUT_DEFAULT
     logger.info(f"→ Polling (hard timeout {int(timeout)}s, videos can take minutes)...")
     result = imini.poll(
         imini.VIDEO_QUERY,
@@ -170,24 +171,6 @@ def cmd_generate(args: argparse.Namespace) -> int:
     return 0
 
 
-def _default_video_timeout(args: argparse.Namespace) -> int:
-    """Mirrors references/errors.md.
-
-    - 5s output  → 300s
-    - 10s output → 600s
-    - 15s output → 900s
-    - reference_video present → 1800s (heavier processing)
-    """
-    if args.reference_video:
-        return imini.VIDEO_TIMEOUT_DEFAULT  # 1800
-    d = args.duration or 5
-    if d <= 5:
-        return 300
-    if d <= 10:
-        return 600
-    return 900
-
-
 def _read_prompt(value: str) -> str:
     if value == "-":
         return sys.stdin.read()
@@ -204,9 +187,9 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
             "  * Model IDs and field names are not hardcoded. Use --list-models to see\n"
             "    what's currently available. Use --extra '<json>' (root) or\n"
             "    --extra-params '<json>' (Kling's extra_params bag) to override.\n"
-            "  * Default timeouts scale with --duration. Long-form video with a\n"
-            "    --reference-video can take up to 30 minutes; --async lets you\n"
-            "    walk away and resume with poll_video_task.py --task-id <id>.\n"
+            "  * Default hard timeout is 30 minutes for all video tasks.\n"
+            "    --async lets you walk away and resume with\n"
+            "    poll_video_task.py --task-id <id>.\n"
             "  * IMINI_API_KEY must be set in your shell (export IMINI_API_KEY=...).\n"
         ),
     )
@@ -274,8 +257,8 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     p.add_argument("--no-download", action="store_true",
                    help="Don't download. Print URLs to stdout instead.")
     p.add_argument("--timeout", type=float, metavar="SECONDS",
-                   help="Hard timeout from submit to succeeded. Scales with --duration "
-                        "and --reference-video.")
+                   help="Hard timeout from submit to succeeded. Default 1800s (30 min) "
+                        "for all video models. Override per-call if needed.")
     p.add_argument("--print-request", action="store_true",
                    help="Print the JSON body that would be sent and exit. Doesn't need an API key.")
     p.add_argument("--api-key", metavar="KEY",
