@@ -113,8 +113,8 @@ def cmd_generate(args: argparse.Namespace) -> int:
         print(task_id)
         return 0
 
-    # Poll until terminal
-    timeout = args.timeout if args.timeout is not None else _default_image_timeout(args.resolution)
+    # Poll until terminal — flat 10-minute default
+    timeout = args.timeout if args.timeout is not None else imini.IMAGE_TIMEOUT_DEFAULT
     logger.info(f"→ Polling (hard timeout {int(timeout)}s)...")
     result = imini.poll(
         imini.IMAGE_QUERY,
@@ -154,16 +154,6 @@ def cmd_generate(args: argparse.Namespace) -> int:
         logger.info(f"  saved → {out_path}  ({size:,} bytes, {meta})")
 
     return 0
-
-
-def _default_image_timeout(resolution: str) -> int:
-    # Mirrors skills/imini-generate/references/errors.md table
-    return {
-        "512": 120,
-        "1K": 120,
-        "2K": 300,
-        "4K": 600,
-    }.get(resolution, imini.IMAGE_TIMEOUT_DEFAULT)
 
 
 def _read_prompt(value: str) -> str:
@@ -233,8 +223,8 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     p.add_argument("--no-download", action="store_true",
                    help="Don't download result files. Print URLs to stdout instead.")
     p.add_argument("--timeout", type=float, metavar="SECONDS",
-                   help="Hard timeout from submit to succeeded. Default scales with "
-                        "--resolution (120s for 1K, up to 600s for 4K, hard cap 900s).")
+                   help="Hard timeout from submit to succeeded. Default 600s (10 min) "
+                        "for all image models. Override per-call if needed.")
     p.add_argument("--print-request", action="store_true",
                    help="Print the JSON body that would be sent and exit. Doesn't need an API key.")
     p.add_argument("--api-key", metavar="KEY",

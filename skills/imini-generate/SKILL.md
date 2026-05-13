@@ -126,7 +126,7 @@ All four scripts share these flags:
 - `--quiet` — only emit the final saved path.
 - `--verbose` — show debug-level polling detail.
 - `--api-key KEY` — override `$IMINI_API_KEY` (discouraged; captured by shell history).
-- `--timeout SECONDS` — override the default hard timeout (images: scales by resolution to 900s, videos: scales by duration to 1800s, plus 30 min cap when reference video is used). See `references/errors.md` for the per-scenario table.
+- `--timeout SECONDS` — override the default hard timeout. Defaults are flat: 600s (10 min) for any image, 1800s (30 min) for any video. See `references/errors.md` for the authoritative numbers.
 - `--list-models` — fetch and print current models from llms.txt (24h cache).
 - `--refresh-cache` — force a live re-fetch of llms.txt.
 

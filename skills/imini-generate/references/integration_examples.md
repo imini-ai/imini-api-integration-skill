@@ -72,8 +72,8 @@ def submit_image(prompt: str, model: str = "google/nano-banana-pro", **extra) ->
     return _request("POST", "/v1/images/generate", {"model": model, "prompt": prompt, **extra})
 
 
-def poll_image(task_id: str, start: float = 2.0, cap: float = 30.0, timeout: float = 900.0) -> dict:
-    """Default timeout 900s (15min) — see references/errors.md for per-scenario tuning."""
+def poll_image(task_id: str, start: float = 2.0, cap: float = 30.0, timeout: float = 600.0) -> dict:
+    """Default timeout 600s (10 min). See references/errors.md."""
     deadline = time.monotonic() + timeout
     interval = start
     while time.monotonic() < deadline:
@@ -441,9 +441,9 @@ echo "Submit: $task_json"
 
 task_id=$(echo "$task_json" | python3 -c 'import sys,json; print(json.load(sys.stdin)["task_id"])')
 
-# 2. Poll — cap at 15 min for images, 30 min for videos. Iterations: 900s / max-interval(30s) ≈ 30 polls.
+# 2. Poll — 10 min cap for images (1800 for videos). Iterations: 600s / max-interval(30s) ≈ 20 polls.
 interval=2
-deadline=$((SECONDS + 900))
+deadline=$((SECONDS + 600))
 while [ "$SECONDS" -lt "$deadline" ]; do
     result=$(curl -sS "$BASE/v1/images/tasks/$task_id" \
         -H "Authorization: Bearer $IMINI_API_KEY")
@@ -466,7 +466,7 @@ for i, img in enumerate(r.get("images", [])):
     [ "$interval" -gt 30 ] && interval=30
 done
 
-echo "Timed out after 900s" >&2
+echo "Timed out after 600s" >&2
 exit 2
 ```
 

@@ -61,20 +61,16 @@ delay = min(cap, base * 1.5^attempt) * (0.8 + 0.4 * random())
 
 Keep one **hard timeout** per task, measured from submit to `succeeded`. Polling retries share the budget.
 
-This table is the **authoritative source** of timeout defaults — `SKILL.md` and `workflow.md` defer to it.
+The bundled scripts use **flat defaults — no per-resolution / per-duration scaling**:
 
-| Scenario | Suggested timeout |
+| Type | Default hard timeout |
 |---|---|
-| Image 1K | 120s |
-| Image 2K | 300s |
-| Image 4K | 600s |
-| Image hard cap | **900s (15 min)** |
-| Video, 5s output | 300s |
-| Video, 10s output | 600s |
-| Video, 15s output | 900s |
-| Video with reference video / long duration | up to **1800s (30 min)** |
+| Image (any model, any resolution) | **600s (10 min)** |
+| Video (any model, any duration, with or without reference video) | **1800s (30 min)** |
 
-These defaults are intentionally generous — queue depth and cold-start variance can swing tail latency by minutes. Tighten on a per-deployment basis only after measuring p99 from real traffic. Treat values above as the cap, not the expected duration.
+These are generous upper bounds — most calls complete in seconds for images and 30–120s for videos. The defaults exist to absorb queue depth and cold-start variance. Override with `--timeout SECONDS` per call if your environment is tighter (e.g. an interactive UI that wants to fail fast) or looser (e.g. long-duration video with a heavy reference video that genuinely needs more headroom).
+
+These two numbers are the **authoritative defaults** — `SKILL.md` and `workflow.md` defer to them. They are also the values of `IMINI_IMAGE_TIMEOUT_DEFAULT` and `VIDEO_TIMEOUT_DEFAULT` in `scripts/_imini_common.py`; change those constants if you want a different default everywhere.
 
 ## Logging checklist
 
