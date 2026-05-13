@@ -159,7 +159,7 @@ Direct use of the parser:
 
 ```bash
 # List everything
-python3 plugins/imini/skills/api-integration/scripts/fetch_imini_catalog.py
+python3 skills/api-integration/scripts/fetch_imini_catalog.py
 
 # Filter by type
 python3 .../scripts/fetch_imini_catalog.py --type video
@@ -214,40 +214,33 @@ All bundled scripts use only the Python 3.8+ standard library (`urllib` / `json`
 ## 📚 Documentation Structure
 
 ```
-imini-api-integration-skill/         # repo root = marketplace root
+imini-api-integration-skill/
 ├── .claude-plugin/
-│   └── marketplace.json             # Claude Code marketplace entry, source: "./plugins/imini"
-├── .codex-plugin/
-│   └── plugin.json                  # Codex Agent-readable manifest (skills hint + install command)
-├── .cursor-plugin/
-│   └── plugin.json                  # Cursor manifest (skills path hint)
-├── plugins/
-│   └── imini/                       # the imini plugin (plugin name = "imini")
-│       ├── .claude-plugin/
-│       │   └── plugin.json          # Claude Code plugin manifest
-│       └── skills/
-│           └── api-integration/     # the skill itself — also installed as ~/.<agent>/skills/api-integration/
-│               ├── SKILL.md         # Routes Path A (run script) vs Path B (codegen)
-│               ├── references/      # Path B (codegen) only
-│               │   ├── workflow.md            # Async task state machine + polling strategy
-│               │   ├── model_selection.md     # Capability decision tree
-│               │   ├── integration_examples.md  # Python (sync+async) / Node.js / TypeScript / cURL templates
-│               │   └── errors.md              # Authoritative timeout table + error codes + retry policy
-│               └── scripts/         # Path A (one-shot generation) + shared catalog fetcher
-│                   ├── _imini_common.py        # Shared submit/poll/upload/download/error core
-│                   ├── generate_image.py       # CLI: image generation across all current/future models
-│                   ├── generate_video.py       # CLI: video generation across all current/future models
-│                   ├── poll_image_task.py      # CLI: resume an image task_id (--async / network drop)
-│                   ├── poll_video_task.py      # CLI: resume a video task_id
-│                   └── fetch_imini_catalog.py  # Live catalog fetcher / parser (stdlib-only)
-├── setup                            # Universal bash installer (auto-detects host)
-├── INSTALL.md                       # All four install paths and update / uninstall instructions
+│   ├── marketplace.json             # Claude Code marketplace catalog
+│   └── plugin.json                  # Claude Code plugin manifest
+├── .codex-plugin/plugin.json        # Codex Agent-readable manifest
+├── .cursor-plugin/plugin.json       # Cursor manifest
+├── skills/
+│   └── api-integration/             # the skill — installed at ~/.<agent>/skills/api-integration/
+│       ├── SKILL.md                 # Workflow entry point (Path A: run script / Path B: codegen)
+│       ├── references/              # Path B (codegen) only
+│       │   ├── workflow.md            # Async task state machine + polling strategy
+│       │   ├── model_selection.md     # Capability decision tree
+│       │   ├── integration_examples.md  # Python (sync+async) / Node.js / TypeScript / cURL templates
+│       │   └── errors.md              # Timeout table + error codes + retry policy
+│       └── scripts/                 # Path A (one-shot generation) + catalog fetcher
+│           ├── _imini_common.py      # Shared submit/poll/upload/download/error core
+│           ├── generate_image.py     # CLI: image generation
+│           ├── generate_video.py     # CLI: video generation
+│           ├── poll_image_task.py    # CLI: resume an image task_id
+│           ├── poll_video_task.py    # CLI: resume a video task_id
+│           └── fetch_imini_catalog.py  # Live catalog fetcher / parser (stdlib-only)
+├── setup                            # Universal bash installer
+├── INSTALL.md
 ├── README.md, README_CN.md
 ├── VERSION
 └── LICENSE
 ```
-
-This layout matches the canonical Claude Code plugin marketplace structure (compare with Anthropic's `claude-plugins-official` repo). `npx skills` recursively discovers `SKILL.md` regardless of nesting, so the same layout serves both the Claude Code marketplace path and every other agent the CLI supports.
 
 ## 🔑 API Key
 

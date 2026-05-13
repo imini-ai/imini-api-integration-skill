@@ -63,7 +63,7 @@ If you're on Codex and your Agent falls back to Codex's bundled installer at `~/
 ```bash
 python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
     --repo imini-ai/imini-api-integration-skill \
-    --path plugins/imini/skills/api-integration
+    --path skills/api-integration
 ```
 
 The `--path` is the same value declared as `skills` in our `.codex-plugin/plugin.json`, so a Codex Agent that reads that manifest first should already derive this command without you typing it. Result lands at `~/.codex/skills/api-integration/`. Restart Codex to pick it up.
@@ -101,7 +101,7 @@ Flags:
 ./setup --help            # full options
 ```
 
-It symlinks `plugins/imini/skills/api-integration` into the host's standalone skills directory. Idempotent — re-run any time. Existing real directories are backed up to `*.bak.<timestamp>` before being replaced.
+It symlinks `skills/api-integration` into the host's standalone skills directory. Idempotent — re-run any time. Existing real directories are backed up to `*.bak.<timestamp>` before being replaced.
 
 ### ⚠ Important: don't clone INTO the install target
 
@@ -111,7 +111,7 @@ If you clone the repo directly into `~/.claude/skills/imini-api-integration/` (o
 
 ```bash
 git clone --depth 1 https://github.com/imini-ai/imini-api-integration-skill.git ~/projects/imini-api-integration-skill
-ln -s ~/projects/imini-api-integration-skill/plugins/imini/skills/api-integration ~/.claude/skills/imini-api-integration
+ln -s ~/projects/imini-api-integration-skill/skills/api-integration ~/.claude/skills/imini-api-integration
 ```
 
 Substitute `~/.claude/` with `~/.codex/`, `~/.cursor/`, or your agent's home directory as needed. See the full agent list in [`vercel-labs/skills`](https://github.com/vercel-labs/skills#supported-agents).
@@ -175,22 +175,19 @@ The agent should detect Path B (codegen) and produce a Python/Node/TS/cURL snipp
 ## Layout reference
 
 ```
-imini-api-integration-skill/         # repo root = marketplace root
+imini-api-integration-skill/         # repo root = marketplace root AND plugin root
 ├── .claude-plugin/
-│   └── marketplace.json             # Claude Code marketplace entry, source: "./plugins/imini"
+│   ├── marketplace.json             # marketplace catalog, source: "./" (self-marketplace)
+│   └── plugin.json                  # Claude Code plugin manifest (name: "imini")
 ├── .codex-plugin/
 │   └── plugin.json                  # Codex Agent-readable manifest (skills hint + install command)
 ├── .cursor-plugin/
 │   └── plugin.json                  # Cursor manifest (skills path hint)
-├── plugins/
-│   └── imini/                       # the imini plugin (plugin name = "imini")
-│       ├── .claude-plugin/
-│       │   └── plugin.json          # Claude Code plugin manifest
-│       └── skills/
-│           └── api-integration/     # the skill itself
-│               ├── SKILL.md         # main workflow
-│               ├── references/      # decision tree, error guide, code templates
-│               └── scripts/         # live catalog fetcher
+├── skills/
+│   └── api-integration/             # the skill itself — installed at ~/.<agent>/skills/api-integration/
+│       ├── SKILL.md                 # main workflow
+│       ├── references/              # decision tree, error guide, code templates
+│       └── scripts/                 # live catalog fetcher + Path A generate/poll scripts
 ├── setup                            # universal bash installer
 ├── INSTALL.md
 ├── README.md
@@ -199,6 +196,6 @@ imini-api-integration-skill/         # repo root = marketplace root
 └── LICENSE
 ```
 
-This layout matches the canonical Claude Code plugin marketplace structure (compare with Anthropic's own `claude-plugins-official` repo). `npx skills` recursively discovers `SKILL.md` inside the repo regardless of nesting, so the same layout serves both the Claude Code marketplace path and every other agent `npx skills` supports.
+After install, `skills/api-integration/` is placed at `~/.<agent>/skills/api-integration/` (via symlink or copy depending on the install method). The four manifest files at the repo root tell each agent's loader (Claude Code marketplace, Codex bundled installer, Cursor) where to find the skill.
 
-The `.codex-plugin/` and `.cursor-plugin/` manifests don't currently have known deterministic consumers (Codex's bundled `install-skill-from-github.py` ignores them, and `cursor.com/schemas/cursor-plugin/plugin.json` returns HTTP 500). They are kept as **AI-Agent-readable hints** — Codex Agents that inspect the repo before running the bundled installer will see `"skills": "./plugins/imini/skills"` and the `install.command` example, and can derive the correct `--path` argument without listing the tree first.
+The `.codex-plugin/` and `.cursor-plugin/` manifests don't currently have known deterministic consumers (Codex's bundled `install-skill-from-github.py` ignores them, and `cursor.com/schemas/cursor-plugin/plugin.json` returns HTTP 500). They are kept as **AI-Agent-readable hints** — Codex Agents that inspect the repo before running the bundled installer will see `"skills": "./skills"` and the `install.command` example, and can derive the correct `--path` argument without listing the tree first.
