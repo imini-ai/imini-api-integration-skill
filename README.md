@@ -81,30 +81,43 @@ Or if you're a Claude Code user and prefer the native plugin flow:
 
 ### Verify
 
-In your agent, ask:
+Two paths — each works for a different use case:
 
-> "How do I generate a 4K image with imini using `google/nano-banana-pro`?"
+**Path A · 🏃 One-shot generation (NEW)** — Just say:
 
-The agent should pick up the skill, ask for your API key (or use `$IMINI_API_KEY`), and produce a runnable async submit-and-poll snippet.
+```
+"Generate a test image with imini, nano-banana"
+"Make a 5-second 1080p video with kling-v3 of a drone over mountains"
+```
+
+The agent runs the **bundled Python script** directly — no codegen, no per-session boilerplate. Result file lands in your cwd in seconds.
+
+**Path B · 🛠️ Integration code** — When you want imini *in your project*:
+
+```
+"How do I generate a 4K image with imini's google/nano-banana-pro from my Django app?"
+"Write TypeScript that batches 100 imini image jobs with concurrency=10"
+```
+
+The agent generates a complete async submit/poll snippet in your language of choice.
 
 ### Basic Usage
 
-Just ask naturally:
+The skill auto-routes based on intent:
 
-```
-"Generate a 4K cinematic image from a prompt using imini, in Python"
-"Create a 10-second 1080P video with a reference video, Node.js"
-"Batch-generate 100 images with imini, concurrency 10"
-```
+| You say | Path | What happens |
+|---|---|---|
+| "Generate / make / draw …" | **A** | Run `scripts/generate_image.py` or `generate_video.py` |
+| "Add imini to / write code for my project" | **B** | Codegen in your chosen language |
+| Ambiguous | Agent asks which |
 
-The skill will:
+Either way, the skill will:
 
-1. ✅ Ask for your imini API key (if missing)
-2. ✅ Fetch the latest model catalog
-3. ✅ Recommend model(s) with cost estimates
-4. ✅ Pull the OpenAPI spec on confirmation
-5. ✅ Generate complete async integration code
-6. ✅ Provide production tips (polling, backoff, concurrency)
+1. ✅ Detect environment (Python 3.8+ for Path A; Node 18+ / Python / cURL for Path B)
+2. ✅ Read `$IMINI_API_KEY` from your shell — never asks you to paste it
+3. ✅ Pull the live model catalog from `docs.imini.ai/llms.txt` (24h cache)
+4. ✅ Recommend model + cost estimate, get explicit confirmation
+5. ✅ Run a script (A) or generate code (B) with proper async handling, jitter, 429 backoff, structured errors, multi-output iteration
 
 ## 💡 Usage Examples
 
@@ -178,13 +191,18 @@ imini-api-integration-skill/         # repo root = marketplace root
 │       │   └── plugin.json          # Claude Code plugin manifest
 │       └── skills/
 │           └── api-integration/     # the skill itself — also installed as ~/.<agent>/skills/api-integration/
-│               ├── SKILL.md         # Main workflow (7 steps)
-│               ├── references/
+│               ├── SKILL.md         # Routes Path A (run script) vs Path B (codegen)
+│               ├── references/      # Path B (codegen) only
 │               │   ├── workflow.md            # Async task state machine + polling strategy
-│               │   ├── model_selection.md     # Decision tree (capability map; price fetched live)
+│               │   ├── model_selection.md     # Capability decision tree
 │               │   ├── integration_examples.md  # Python (sync+async) / Node.js / TypeScript / cURL templates
 │               │   └── errors.md              # Authoritative timeout table + error codes + retry policy
-│               └── scripts/
+│               └── scripts/         # Path A (one-shot generation) + shared catalog fetcher
+│                   ├── _imini_common.py        # Shared submit/poll/upload/download/error core
+│                   ├── generate_image.py       # CLI: image generation across all current/future models
+│                   ├── generate_video.py       # CLI: video generation across all current/future models
+│                   ├── poll_image_task.py      # CLI: resume an image task_id (--async / network drop)
+│                   ├── poll_video_task.py      # CLI: resume a video task_id
 │                   └── fetch_imini_catalog.py  # Live catalog fetcher / parser (stdlib-only)
 ├── setup                            # Universal bash installer (auto-detects host)
 ├── INSTALL.md                       # All four install paths and update / uninstall instructions

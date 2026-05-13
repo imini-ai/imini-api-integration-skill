@@ -1,6 +1,6 @@
 {
   "name": "imini",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "imini Open Platform integration — async image/video generation code helper across nano-banana, gpt-image-2, kling, seedance, happyhorse, and more.",
   "author": {
     "name": "imini",
