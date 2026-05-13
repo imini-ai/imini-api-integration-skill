@@ -162,7 +162,7 @@ Skill 会根据你的意图自动路由：
 
 ```bash
 # 列全部
-python3 skills/api-integration/scripts/fetch_imini_catalog.py
+python3 skills/imini-generate/scripts/fetch_imini_catalog.py
 
 # 按类型筛选
 python3 .../scripts/fetch_imini_catalog.py --type video
@@ -224,7 +224,7 @@ imini-api-integration-skill/
 ├── .codex-plugin/plugin.json        # Codex Agent 可读的 manifest
 ├── .cursor-plugin/plugin.json       # Cursor manifest
 ├── skills/
-│   └── api-integration/             # skill 本体 —— 装到 ~/.<agent>/skills/api-integration/
+│   └── imini-generate/             # skill 本体 —— 装到 ~/.<agent>/skills/imini-generate/
 │       ├── SKILL.md                 # 工作流入口（Path A 跑脚本 / Path B 生代码）
 │       ├── references/              # Path B（生代码）专用
 │       │   ├── workflow.md            # 异步任务状态机 + 轮询策略

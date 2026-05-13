@@ -1,6 +1,6 @@
 {
   "name": "imini",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "imini Open Platform integration — async image/video generation code helper across nano-banana, gpt-image-2, kling, seedance, happyhorse, and more.",
   "author": {
     "name": "imini",
@@ -21,7 +21,7 @@
   "skills": "./skills",
   "install": {
     "installer": "codex-bundled",
-    "command": "scripts/install-skill-from-github.py --repo imini-ai/imini-api-integration-skill --path skills/api-integration",
+    "command": "scripts/install-skill-from-github.py --repo imini-ai/imini-api-integration-skill --path skills/imini-generate",
     "note": "The Codex bundled installer (~/.codex/skills/.system/skill-installer/) does not auto-discover SKILL.md outside the repo root. Pass --path explicitly as shown."
   },
   "interface": {

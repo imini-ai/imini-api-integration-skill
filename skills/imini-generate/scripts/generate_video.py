@@ -171,7 +171,7 @@ def cmd_generate(args: argparse.Namespace) -> int:
 
 
 def _default_video_timeout(args: argparse.Namespace) -> int:
-    """Mirrors plugins/imini/skills/api-integration/references/errors.md.
+    """Mirrors references/errors.md.
 
     - 5s output  → 300s
     - 10s output → 600s
