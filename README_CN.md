@@ -162,7 +162,7 @@ Skill 会根据你的意图自动路由：
 
 ```bash
 # 列全部
-python3 plugins/imini/skills/api-integration/scripts/fetch_imini_catalog.py
+python3 skills/api-integration/scripts/fetch_imini_catalog.py
 
 # 按类型筛选
 python3 .../scripts/fetch_imini_catalog.py --type video
@@ -217,40 +217,33 @@ python3 .../scripts/poll_video_task.py --task-id "$TASK_ID" --output ./out.mp4
 ## 📚 目录结构
 
 ```
-imini-api-integration-skill/         # 仓库根 = marketplace 根
+imini-api-integration-skill/
 ├── .claude-plugin/
-│   └── marketplace.json             # Claude Code marketplace 入口，source: "./plugins/imini"
-├── .codex-plugin/
-│   └── plugin.json                  # Codex Agent 可读的 manifest（skills 路径 hint + 安装命令）
-├── .cursor-plugin/
-│   └── plugin.json                  # Cursor manifest（skills 路径 hint）
-├── plugins/
-│   └── imini/                       # imini plugin（plugin 名 "imini"）
-│       ├── .claude-plugin/
-│       │   └── plugin.json          # Claude Code plugin manifest
-│       └── skills/
-│           └── api-integration/     # skill 本体 —— 各 agent 装到 ~/.<agent>/skills/api-integration/
-│               ├── SKILL.md         # Step 0 路由（Path A 跑脚本 / Path B 生代码）
-│               ├── references/      # Path B（生代码）专用
-│               │   ├── workflow.md            # 异步任务状态机 + 轮询策略
-│               │   ├── model_selection.md     # 选型决策树（能力地图，定价实时拉）
-│               │   ├── integration_examples.md  # Python / Node.js / TS / cURL 模板
-│               │   └── errors.md              # 权威超时表 + 错误码 + 重试策略
-│               └── scripts/         # Path A（直接生成）+ 共享 catalog 脚本
-│                   ├── _imini_common.py        # submit/poll/上传/下载/错误处理 共享内核
-│                   ├── generate_image.py       # CLI：覆盖所有当前/未来图像模型
-│                   ├── generate_video.py       # CLI：覆盖所有当前/未来视频模型
-│                   ├── poll_image_task.py      # CLI：用 task_id 续 poll 图（--async / 网络断开）
-│                   ├── poll_video_task.py      # CLI：用 task_id 续 poll 视频
-│                   └── fetch_imini_catalog.py  # 实时拉取并解析 llms.txt（纯标准库）
-├── setup                            # 通用 bash 安装脚本（自动检测 host）
-├── INSTALL.md                       # 4 种安装方式 + 更新 / 卸载
+│   ├── marketplace.json             # Claude Code marketplace 目录
+│   └── plugin.json                  # Claude Code plugin manifest
+├── .codex-plugin/plugin.json        # Codex Agent 可读的 manifest
+├── .cursor-plugin/plugin.json       # Cursor manifest
+├── skills/
+│   └── api-integration/             # skill 本体 —— 装到 ~/.<agent>/skills/api-integration/
+│       ├── SKILL.md                 # 工作流入口（Path A 跑脚本 / Path B 生代码）
+│       ├── references/              # Path B（生代码）专用
+│       │   ├── workflow.md            # 异步任务状态机 + 轮询策略
+│       │   ├── model_selection.md     # 选型决策树
+│       │   ├── integration_examples.md  # Python / Node.js / TS / cURL 模板
+│       │   └── errors.md              # 超时表 + 错误码 + 重试策略
+│       └── scripts/                 # Path A（直接生成）+ catalog 脚本
+│           ├── _imini_common.py      # submit/poll/上传/下载/错误处理 共享内核
+│           ├── generate_image.py     # CLI：图像生成
+│           ├── generate_video.py     # CLI：视频生成
+│           ├── poll_image_task.py    # CLI：用 task_id 续 poll 图
+│           ├── poll_video_task.py    # CLI：用 task_id 续 poll 视频
+│           └── fetch_imini_catalog.py  # 实时拉取并解析 llms.txt（纯标准库）
+├── setup                            # 通用 bash 安装脚本
+├── INSTALL.md
 ├── README.md, README_CN.md
 ├── VERSION
 └── LICENSE
 ```
-
-布局对齐 Anthropic 官方 marketplace（`claude-plugins-official` repo）。`npx skills` 会**递归发现 `SKILL.md`**，所以一份布局同时服务 Claude marketplace 和其他所有 agent。
 
 ## 🔑 API Key
 

@@ -1,6 +1,6 @@
 ---
 name: imini-api-integration
-description: Use this skill whenever the user needs to generate, edit, or integrate AIGC images or videos with imini Open Platform — text-to-image, image editing with references, text-to-video, image-to-video, first/last frame, reference video, motion control, video editing, or multimodal generation. Two paths: (A) ad-hoc one-shot generation right now via bundled Python scripts (no codegen, no token burn for re-deriving submit/poll logic); (B) writing async integration code into the user's own project. Triggers on mentions of imini, openapi.imini.ai, or any imini model id (nano-banana, nano-banana-pro, nano-banana-2, gpt-image-2, kling-v3, kling-v3-omni, kling-v3-motion-control, seedance-2.0, seedance-2.0-fast, happyhorse-1.0).
+description: Use this skill whenever the user needs to generate, edit, or integrate AIGC images or videos with imini Open Platform — text-to-image, image editing with references, text-to-video, image-to-video, first/last frame, reference video, motion control, video editing, or multimodal generation. Two paths — (A) ad-hoc one-shot generation right now via bundled Python scripts (no codegen, no token burn for re-deriving submit/poll logic); (B) writing async integration code into the user's own project. Triggers on mentions of imini, openapi.imini.ai, or any imini model id (nano-banana, nano-banana-pro, nano-banana-2, gpt-image-2, kling-v3, kling-v3-omni, kling-v3-motion-control, seedance-2.0, seedance-2.0-fast, happyhorse-1.0).
 ---
 
 # imini Open Platform API Integration
